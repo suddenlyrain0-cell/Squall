@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>게임 이름 - 공식 홈페이지</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111827;
+      color: #f9fafb;
+    }
+
+    header {
+      text-align: center;
+      padding: 90px 20px;
+      background: linear-gradient(135deg, #1f2937, #111827);
+    }
+
+    header h1 {
+      font-size: 48px;
+      margin: 0 0 12px;
+    }
+
+    header p {
+      color: #d1d5db;
+      font-size: 18px;
+    }
+
+    .button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 14px 24px;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    section {
+      margin-bottom: 48px;
+    }
+
+    h2 {
+      border-bottom: 1px solid #374151;
+      padding-bottom: 12px;
+    }
+
+    .notice {
+      display: grid;
+      grid-template-columns: 80px 1fr 120px;
+      gap: 12px;
+      padding: 16px 0;
+      border-bottom: 1px solid #374151;
+      align-items: center;
+    }
+
+    .notice a {
+      color: #f9fafb;
+      text-decoration: none;
+    }
+
+    .notice a:hover {
+      text-decoration: underline;
+    }
+
+    .tag {
+      background: #374151;
+      padding: 6px 10px;
+      border-radius: 999px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    time {
+      color: #9ca3af;
+      font-size: 14px;
+    }
+
+    .links a {
+      display: inline-block;
+      margin-right: 12px;
+      margin-bottom: 12px;
+      color: #93c5fd;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #9ca3af;
+      border-top: 1px solid #374151;
+    }
+
+    @media (max-width: 640px) {
+      header h1 {
+        font-size: 36px;
+      }
+
+      .notice {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>게임 이름</h1>
+    <p>공식 홈페이지에 오신 것을 환영합니다.</p>
+    <a class="button" href="#">게임 다운로드</a>
+  </header>
+
+  <main>
+    <section>
+      <h2>공지사항</h2>
+
+      <article class="notice">
+        <span class="tag">공지</span>
+        <a href="#">공식 홈페이지 오픈 안내</a>
+        <time>2026.06.10</time>
+      </article>
+
+      <article class="notice">
+        <span class="tag">점검</span>
+        <a href="#">정기 점검 안내</a>
+        <time>2026.06.10</time>
+      </article>
+
+      <article class="notice">
+        <span class="tag">업데이트</span>
+        <a href="#">업데이트 안내</a>
+        <time>2026.06.10</time>
+      </article>
+    </section>
+
+    <section>
+      <h2>바로가기</h2>
+      <div class="links">
+        <a href="#">디스코드</a>
+        <a href="#">고객센터</a>
+        <a href="#">운영정책</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 게임 이름. All rights reserved.</p>
+  </footer>
+</body>
+</html>
