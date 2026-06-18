@@ -11,10 +11,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SQUALL Community Hub",
+  title: "스콜 SQUALL",
   description: "The official community hub for SQUALL games and players.",
   icons: {
-    icon: "/SquallLogo.png"
+    icon: "/SquallLogo.png",
+    shortcut: "/SquallLogo.png",
+    apple: "/SquallLogo.png"
   }
 };
 

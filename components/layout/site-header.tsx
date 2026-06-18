@@ -2,44 +2,128 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, LogIn, Menu, Search, UserRound, X } from "lucide-react";
-import { useState } from "react";
+import { Bell, Menu, Search, X } from "lucide-react";
+import { useMemo, useState } from "react";
 import { mainNav } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
+import { notices, posts, updateNotes } from "@/services/mock-data";
 
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const isLoggedIn = false;
+  const trimmedSearch = search.trim().toLowerCase();
+  const searchResults = useMemo(() => {
+    if (!trimmedSearch) {
+      return [];
+    }
+
+    const postResults = posts.map((post) => ({
+      key: post.id,
+      type: post.tag,
+      title: post.title,
+      description: post.excerpt,
+      href: `/post/${post.id}`,
+      searchable: [post.title, post.excerpt, post.author, post.tag].join(" ")
+    }));
+    const noticeResults = notices.map((notice) => ({
+      key: notice.id,
+      type: "공지",
+      title: notice.title,
+      description: notice.excerpt,
+      href: "/notice",
+      searchable: [notice.title, notice.excerpt, notice.type].join(" ")
+    }));
+    const updateResults = updateNotes.map((note) => ({
+      key: note.version,
+      type: "업데이트",
+      title: note.version,
+      description: note.summary,
+      href: "/update",
+      searchable: [note.version, note.summary, note.items.join(" ")].join(" ")
+    }));
+
+    return [...postResults, ...noticeResults, ...updateResults]
+      .filter((item) => item.searchable.toLowerCase().includes(trimmedSearch))
+      .slice(0, 5);
+  }, [trimmedSearch]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#111111]/82 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 bg-[#0f0f0f]">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
-        <Logo />
+        <div className="flex items-center gap-10 lg:gap-14">
+          <Logo />
 
-        <nav className="hidden items-center gap-2 md:flex">
-          {mainNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "rounded-full px-4 py-2 text-sm font-bold text-white/62 transition hover:bg-white/8 hover:text-white",
-                pathname === item.href && "bg-primary text-[#111111] hover:bg-primary hover:text-[#111111]"
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+          <nav className="hidden items-center gap-8 md:flex lg:gap-10">
+            {mainNav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "text-sm font-semibold text-zinc-500 transition hover:text-white lg:text-base",
+                  pathname === item.href && "text-white"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
 
-        <div className="hidden items-center gap-2 md:flex">
-          <Button asChild variant="ghost" size="icon">
-            <Link href="/search" aria-label="Search">
-              <Search className="h-5 w-5" />
-            </Link>
-          </Button>
+        <div className="hidden items-center gap-3 md:flex">
+          <form
+            className="relative"
+            role="search"
+            onSubmit={(event) => event.preventDefault()}
+          >
+            <label className="group flex h-10 w-[230px] items-center gap-2.5 rounded-full border border-zinc-700 bg-[#121212] px-4 text-zinc-500 transition focus-within:border-zinc-300 focus-within:bg-[#171717] lg:w-[280px]">
+              <input
+                className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-white outline-none placeholder:text-zinc-500"
+                placeholder="게시물 검색"
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setSearchOpen(true);
+                }}
+                onFocus={() => setSearchOpen(true)}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
+                    setSearchOpen(false);
+                    event.currentTarget.blur();
+                  }
+                }}
+              />
+              <Search className="h-5 w-5 shrink-0 text-zinc-500 transition group-focus-within:text-white" />
+            </label>
+            {searchOpen && trimmedSearch ? (
+              <div className="absolute right-0 top-12 w-[300px] overflow-hidden rounded-2xl border border-white/10 bg-[#171717] p-2 shadow-2xl ring-1 ring-black/30">
+                {searchResults.length > 0 ? (
+                  <div className="grid gap-1">
+                    {searchResults.map((item) => (
+                      <Link
+                        key={`${item.type}-${item.key}`}
+                        href={item.href}
+                        className="block rounded-xl px-4 py-3 transition hover:bg-white/8"
+                        onClick={() => setSearchOpen(false)}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full bg-primary/16 px-2.5 py-1 text-xs font-black text-primary">{item.type}</span>
+                          <p className="truncate text-sm font-black text-white">{item.title}</p>
+                        </div>
+                        <p className="mt-2 line-clamp-1 text-xs font-semibold text-white/48">{item.description}</p>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="px-4 py-5 text-sm font-bold text-white/48">검색 결과가 없습니다.</p>
+                )}
+              </div>
+            ) : null}
+          </form>
           {isLoggedIn ? (
             <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/8 py-1 pl-1 pr-3">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-black text-[#111111]">
@@ -49,8 +133,7 @@ export function SiteHeader() {
               <Bell className="h-4 w-4 text-white/58" />
             </div>
           ) : (
-            <Button variant="secondary">
-              <LogIn className="h-4 w-4" />
+            <Button className="h-9 rounded-full bg-[#F34818] px-5 text-sm font-semibold text-white shadow-none hover:-translate-y-0 hover:bg-[#ff5a2a]">
               Login
             </Button>
           )}
@@ -62,23 +145,50 @@ export function SiteHeader() {
       </div>
 
       {open ? (
-        <div className="border-t border-white/10 bg-[#111111] px-5 py-5 md:hidden">
+        <div className="bg-[#0f0f0f] px-5 py-5 md:hidden">
           <div className="grid gap-2">
             {mainNav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="rounded-xl px-4 py-3 text-base font-bold text-white/76 hover:bg-white/8"
+                className={cn(
+                  "rounded-xl px-4 py-3 text-base font-semibold text-zinc-500 transition hover:bg-white/8 hover:text-white",
+                  pathname === item.href && "text-white"
+                )}
               >
                 {item.label}
               </Link>
             ))}
-            <Link href="/search" onClick={() => setOpen(false)} className="rounded-xl px-4 py-3 text-base font-bold text-white/76 hover:bg-white/8">
-              Search
-            </Link>
-            <Button className="mt-3 w-full">
-              <UserRound className="h-4 w-4" />
+            <label className="mt-2 flex min-h-11 items-center gap-3 rounded-2xl border border-zinc-700 bg-[#121212] px-4 text-zinc-500 focus-within:border-zinc-300 focus-within:bg-[#171717]">
+              <input
+                className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-white outline-none placeholder:text-zinc-500"
+                placeholder="게시물 검색"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+              <Search className="h-5 w-5 shrink-0 text-zinc-500" />
+            </label>
+            {trimmedSearch ? (
+              <div className="grid gap-1">
+                {searchResults.length > 0 ? (
+                  searchResults.map((item) => (
+                    <Link
+                      key={`${item.type}-${item.key}`}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className="rounded-xl px-4 py-3 hover:bg-white/8"
+                    >
+                      <p className="text-sm font-black text-white">{item.title}</p>
+                      <p className="mt-1 text-xs font-semibold text-white/48">{item.type}</p>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="rounded-xl px-4 py-3 text-sm font-bold text-white/48">검색 결과가 없습니다.</p>
+                )}
+              </div>
+            ) : null}
+            <Button className="mt-3 h-10 w-full rounded-full bg-[#F34818] text-sm font-semibold text-white shadow-none hover:-translate-y-0 hover:bg-[#ff5a2a]">
               Login
             </Button>
           </div>

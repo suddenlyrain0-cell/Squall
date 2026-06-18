@@ -3,8 +3,8 @@ import type { BoardCategory } from "@/types/community";
 export const mainNav = [
   { label: "Community", href: "/community" },
   { label: "Notice", href: "/notice" },
-  { label: "Update", href: "/update" },
-  { label: "Event", href: "/event" }
+  { label: "Event", href: "/event" },
+  { label: "About Us", href: "#about-us" }
 ];
 
 export const boardCategories: Array<{ label: string; value: BoardCategory }> = [
