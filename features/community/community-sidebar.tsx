@@ -12,7 +12,7 @@ const icons: Partial<Record<BoardCategory, ComponentType<{ className?: string }>
 
 export function CommunitySidebar() {
   return (
-    <aside className="lg:sticky lg:top-28">
+    <aside className="hidden lg:sticky lg:top-28 lg:block">
       <p className="mb-2 px-2 text-xs font-black tracking-[0.14em] text-zinc-400">게시판</p>
       <nav className="grid gap-0.5">
         {boardCategories.map((category, index) => {

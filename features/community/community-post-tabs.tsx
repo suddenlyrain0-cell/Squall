@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Lock, Pencil, Pin } from "lucide-react";
+import { boardCategories } from "@/constants/navigation";
 import { notices, posts } from "@/services/mock-data";
 
 const tabs = [
@@ -35,7 +36,7 @@ export function CommunityPostTabs() {
 
   return (
     <>
-      <div className="mb-5 flex items-end justify-between border-b border-zinc-200">
+      <div className="flex items-end justify-between border-b border-zinc-200">
         <nav className="flex" aria-label="커뮤니티 게시글 탭">
           {tabs.map((tab) => (
             <button
@@ -60,6 +61,22 @@ export function CommunityPostTabs() {
           글쓰기
         </Link>
       </div>
+
+      <nav className="mb-4 flex gap-5 overflow-x-auto border-b border-zinc-100 px-3 py-2 md:hidden" aria-label="모바일 게시판 메뉴">
+        {boardCategories.map((category, index) => (
+          <Link
+            key={category.value}
+            href={`/community?board=${category.value}`}
+            className={
+              index === 0
+                ? "shrink-0 text-xs font-semibold text-[#111111]"
+                : "shrink-0 text-xs font-normal text-zinc-500"
+            }
+          >
+            {category.label}
+          </Link>
+        ))}
+      </nav>
 
       <div className="border-y border-zinc-200 bg-white md:hidden">
         {activeTab === "notice"
