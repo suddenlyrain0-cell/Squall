@@ -61,7 +61,43 @@ export function CommunityPostTabs() {
         </Link>
       </div>
 
-      <div className="overflow-x-auto border-y border-zinc-200 bg-white">
+      <div className="border-y border-zinc-200 bg-white md:hidden">
+        {activeTab === "notice"
+          ? notices.map((notice) => (
+              <Link key={notice.id} href="/notice" className="block border-b border-zinc-200 px-3 py-3 transition hover:bg-zinc-50">
+                <h3 className="flex items-center gap-1.5 text-base font-medium leading-snug text-zinc-900">
+                  <Lock className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
+                  <Pin className="h-3.5 w-3.5 shrink-0 text-primary" />
+                  <span className="line-clamp-2">{notice.title}</span>
+                </h3>
+                <p className="mt-1 text-xs text-zinc-500">
+                  {noticeTypeLabel[notice.type]}
+                  <span className="mx-1.5 text-zinc-300">|</span>
+                  SQUALL
+                  <span className="mx-1.5 text-zinc-300">|</span>
+                  {notice.date}
+                </p>
+              </Link>
+            ))
+          : visiblePosts.map((post) => (
+              <Link key={post.id} href={`/post/${post.id}`} className="block border-b border-zinc-200 px-3 py-3 transition hover:bg-zinc-50">
+                <h3 className="line-clamp-2 text-base font-medium leading-snug text-zinc-900">{post.title}</h3>
+                <p className="mt-1 text-xs text-zinc-500">
+                  <span className="text-primary">{categoryLabel[post.category]}</span>
+                  <span className="mx-1.5 text-zinc-300">|</span>
+                  {post.author}
+                  <span className="mx-1.5 text-zinc-300">|</span>
+                  조회 {post.views.toLocaleString()}
+                  <span className="mx-1.5 text-zinc-300">|</span>
+                  댓글 {post.comments}
+                  <span className="mx-1.5 text-zinc-300">|</span>
+                  {post.date}
+                </p>
+              </Link>
+            ))}
+      </div>
+
+      <div className="hidden overflow-x-auto border-y border-zinc-200 bg-white md:block">
         <table className="w-full table-fixed border-collapse">
           <colgroup>
             <col />
