@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { posts } from "@/services/mock-data";
 
+export function generateStaticParams() {
+  return posts.map((post) => ({
+    id: post.id
+  }));
+}
+
 export default function PostDetailPage({ params }: { params: { id: string } }) {
   const post = posts.find((item) => item.id === params.id);
 
