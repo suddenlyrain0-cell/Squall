@@ -5,7 +5,7 @@ import { CommunitySidebar } from "@/features/community/community-sidebar";
 export default function CommunityPage() {
   return (
     <main className="bg-white text-[#111111]">
-      <div className="mx-auto grid max-w-7xl gap-7 px-4 py-8 sm:px-5 lg:grid-cols-[190px_1fr] lg:px-8 lg:py-12">
+      <div className="mx-auto grid max-w-7xl gap-7 px-4 pb-8 pt-0 sm:px-5 lg:grid-cols-[190px_1fr] lg:px-8 lg:py-12">
         <CommunitySidebar />
         <section>
           <div className="relative mb-8 w-screen -translate-x-4 overflow-hidden border-y border-zinc-200 bg-zinc-900 shadow-sm sm:w-auto sm:translate-x-0 sm:rounded-xl sm:border">

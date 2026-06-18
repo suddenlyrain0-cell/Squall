@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { MobileCommunityRedirect } from "@/app/mobile-community-redirect";
 import { AnimatedHero } from "@/features/community/animated-hero";
 import { notices } from "@/services/mock-data";
 
 export default function HomePage() {
   return (
     <main>
+      <MobileCommunityRedirect />
       <AnimatedHero />
 
       <div className="bg-white text-[#111111]">
