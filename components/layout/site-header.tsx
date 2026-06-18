@@ -139,59 +139,52 @@ export function SiteHeader() {
           )}
         </div>
 
-        <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen((value) => !value)}>
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </Button>
+        <div className="flex items-center gap-1 md:hidden">
+          <Button asChild variant="ghost" size="icon">
+            <Link href="/search" aria-label="Search">
+              <Search className="h-5 w-5" />
+            </Link>
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => setOpen(true)}>
+            <Menu className="h-6 w-6" />
+          </Button>
+        </div>
       </div>
 
       {open ? (
-        <div className="bg-[#0f0f0f] px-5 py-5 md:hidden">
-          <div className="grid gap-2">
-            {mainNav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "rounded-xl px-4 py-3 text-base font-semibold text-zinc-500 transition hover:bg-white/8 hover:text-white",
-                  pathname === item.href && "text-white"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <label className="mt-2 flex min-h-11 items-center gap-3 rounded-2xl border border-zinc-700 bg-[#121212] px-4 text-zinc-500 focus-within:border-zinc-300 focus-within:bg-[#171717]">
-              <input
-                className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-white outline-none placeholder:text-zinc-500"
-                placeholder="게시물 검색"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-              />
-              <Search className="h-5 w-5 shrink-0 text-zinc-500" />
-            </label>
-            {trimmedSearch ? (
-              <div className="grid gap-1">
-                {searchResults.length > 0 ? (
-                  searchResults.map((item) => (
-                    <Link
-                      key={`${item.type}-${item.key}`}
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className="rounded-xl px-4 py-3 hover:bg-white/8"
-                    >
-                      <p className="text-sm font-black text-white">{item.title}</p>
-                      <p className="mt-1 text-xs font-semibold text-white/48">{item.type}</p>
-                    </Link>
-                  ))
-                ) : (
-                  <p className="rounded-xl px-4 py-3 text-sm font-bold text-white/48">검색 결과가 없습니다.</p>
-                )}
-              </div>
-            ) : null}
-            <Button className="mt-3 h-10 w-full rounded-full bg-[#F34818] text-sm font-semibold text-white shadow-none hover:-translate-y-0 hover:bg-[#ff5a2a]">
-              Login
-            </Button>
-          </div>
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button
+            type="button"
+            aria-label="Close menu"
+            className="absolute inset-0 bg-black/55"
+            onClick={() => setOpen(false)}
+          />
+          <aside className="absolute right-0 top-0 flex h-full w-[84vw] max-w-sm flex-col bg-[#0f0f0f] px-6 py-6 shadow-2xl">
+            <div className="mb-8 flex items-center justify-between">
+              <Logo />
+              <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
+                <X className="h-6 w-6" />
+              </Button>
+            </div>
+            <div className="grid gap-3">
+              {mainNav.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "rounded-xl px-4 py-3 text-base font-semibold text-zinc-500 transition hover:bg-white/8 hover:text-white",
+                    pathname === item.href && "text-white"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <Button className="mt-3 h-10 w-full rounded-full bg-[#F34818] text-sm font-semibold text-white shadow-none hover:-translate-y-0 hover:bg-[#ff5a2a]">
+                Login
+              </Button>
+            </div>
+          </aside>
         </div>
       ) : null}
     </header>
