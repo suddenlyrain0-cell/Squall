@@ -36,8 +36,8 @@ export function CommunityPostTabs() {
 
   return (
     <>
-      <div className="flex items-end justify-between border-b border-zinc-200">
-        <nav className="flex" aria-label="커뮤니티 게시글 탭">
+      <div className="flex min-w-0 items-end justify-between border-b border-zinc-200">
+        <nav className="flex min-w-0" aria-label="커뮤니티 게시글 탭">
           {tabs.map((tab) => (
             <button
               key={tab.value}
@@ -45,8 +45,8 @@ export function CommunityPostTabs() {
               onClick={() => setActiveTab(tab.value)}
               className={
                 activeTab === tab.value
-                  ? "border-b-2 border-primary px-4 py-3 text-sm font-black text-[#111111]"
-                  : "px-4 py-3 text-sm font-bold text-zinc-500 transition hover:text-[#111111]"
+                  ? "shrink-0 border-b-2 border-primary px-3 py-3 text-sm font-black text-[#111111] sm:px-4"
+                  : "shrink-0 px-3 py-3 text-sm font-bold text-zinc-500 transition hover:text-[#111111] sm:px-4"
               }
             >
               {tab.label}
@@ -55,9 +55,9 @@ export function CommunityPostTabs() {
         </nav>
         <Link
           href="/community/write"
-          className="mb-2 inline-flex h-8 items-center gap-1.5 rounded-md bg-[#F34818] px-3 text-xs font-semibold text-white transition hover:bg-[#ff5a2a]"
+          className="mb-2 inline-flex h-7 shrink-0 items-center gap-1 rounded-md bg-[#F34818] px-2.5 text-xs font-semibold text-white transition hover:bg-[#ff5a2a] sm:h-8 sm:gap-1.5 sm:px-3"
         >
-          <Pencil className="h-3.5 w-3.5" />
+          <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           글쓰기
         </Link>
       </div>
