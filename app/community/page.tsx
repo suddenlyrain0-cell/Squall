@@ -26,13 +26,12 @@ export default function CommunityPage() {
                   <Image src="/VikingDefense600.png" alt="Viking Defense" fill className="object-cover" sizes="80px" />
                 </div>
                 <div className="min-w-0">
-                  <h1 className="text-xl font-black text-white sm:text-3xl">바이킹 디펜스</h1>
+                  <h1 className="text-xl font-black text-white sm:text-3xl">Viking Defense</h1>
                   <p className="mt-1 max-w-md text-xs font-medium leading-5 text-white sm:mt-1.5 sm:text-sm sm:leading-6">
-                    공략을 공유하고, 버그를 제보하고, 개발팀과 함께 게임을 다듬는 공간입니다.
+                    Share guides, report bugs, and talk with the SQUALL community.
                   </p>
                 </div>
               </div>
-
             </div>
           </div>
 

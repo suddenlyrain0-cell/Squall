@@ -7,7 +7,7 @@ export const mainNav = [
 ];
 
 export const boardCategories: Array<{ label: string; value: BoardCategory }> = [
-  { label: "자유게시판", value: "free" },
-  { label: "가이드", value: "guide" },
-  { label: "버그 제보", value: "bug" }
+  { label: "Free Board", value: "free" },
+  { label: "Guide", value: "guide" },
+  { label: "Bug Report", value: "bug" }
 ];

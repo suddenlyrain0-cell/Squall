@@ -1,43 +1,87 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Lock, Pencil, Pin } from "lucide-react";
 import { boardCategories } from "@/constants/navigation";
 import { notices, posts } from "@/services/mock-data";
+import { fetchCommunityPosts } from "@/services/community-posts";
+import type { BoardCategory, Post } from "@/types/community";
 
 const tabs = [
-  { label: "전체", value: "all" },
-  { label: "인기", value: "popular" },
-  { label: "공지", value: "notice" }
+  { label: "All", value: "all" },
+  { label: "Popular", value: "popular" },
+  { label: "Notices", value: "notice" }
 ] as const;
 
 type CommunityTab = (typeof tabs)[number]["value"];
 
-const categoryLabel = {
-  free: "자유게시판",
-  guide: "공략",
-  question: "질문",
-  bug: "버그 제보",
-  suggestion: "건의사항",
-  fanart: "팬아트"
+const categoryLabel: Record<BoardCategory, string> = {
+  free: "Free",
+  guide: "Guide",
+  question: "Question",
+  bug: "Bug",
+  suggestion: "Suggestion",
+  fanart: "Fan Art"
 };
 
 const noticeTypeLabel = {
-  update: "업데이트",
-  event: "이벤트",
-  maintenance: "점검",
-  general: "운영 공지사항"
+  update: "Update",
+  event: "Event",
+  maintenance: "Maintenance",
+  general: "Notice"
 };
+
+function PostMeta({ post }: { post: Post }) {
+  return (
+    <p className="mt-1 truncate text-xs font-normal text-zinc-500">
+      <span className="text-primary">{categoryLabel[post.category]}</span>
+      <span className="mx-2 text-zinc-300">/</span>
+      {post.author}
+      <span className="mx-2 text-zinc-300">/</span>
+      {post.date}
+    </p>
+  );
+}
 
 export function CommunityPostTabs() {
   const [activeTab, setActiveTab] = useState<CommunityTab>("all");
-  const visiblePosts = activeTab === "popular" ? posts.filter((post) => post.likes >= 80) : posts;
+  const [livePosts, setLivePosts] = useState<Post[]>([]);
+  const [loadingLivePosts, setLoadingLivePosts] = useState(true);
+  const [livePostsError, setLivePostsError] = useState("");
+  const allPosts = useMemo(() => [...livePosts, ...posts], [livePosts]);
+  const visiblePosts = activeTab === "popular" ? allPosts.filter((post) => post.likes >= 80) : allPosts;
+
+  useEffect(() => {
+    let mounted = true;
+
+    fetchCommunityPosts()
+      .then((items) => {
+        if (mounted) {
+          setLivePosts(items);
+          setLivePostsError("");
+        }
+      })
+      .catch((error) => {
+        if (mounted) {
+          setLivePostsError(error instanceof Error ? error.message : "Failed to load posts.");
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          setLoadingLivePosts(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <>
       <div className="flex min-w-0 items-end justify-between border-b border-zinc-200">
-        <nav className="flex min-w-0" aria-label="커뮤니티 게시글 탭">
+        <nav className="flex min-w-0" aria-label="Community posts">
           {tabs.map((tab) => (
             <button
               key={tab.value}
@@ -58,20 +102,16 @@ export function CommunityPostTabs() {
           className="mb-2 inline-flex h-7 shrink-0 items-center gap-1 rounded-md bg-[#F34818] px-2.5 text-xs font-semibold text-white transition hover:bg-[#ff5a2a] sm:h-8 sm:gap-1.5 sm:px-3"
         >
           <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-          글쓰기
+          Write
         </Link>
       </div>
 
-      <nav className="mb-4 flex gap-5 overflow-x-auto border-b border-zinc-100 px-3 py-2 md:hidden" aria-label="모바일 게시판 메뉴">
+      <nav className="mb-4 flex gap-5 overflow-x-auto border-b border-zinc-100 px-3 py-2 md:hidden" aria-label="Boards">
         {boardCategories.map((category, index) => (
           <Link
             key={category.value}
             href={`/community?board=${category.value}`}
-            className={
-              index === 0
-                ? "shrink-0 text-xs font-semibold text-[#111111]"
-                : "shrink-0 text-xs font-normal text-zinc-500"
-            }
+            className={index === 0 ? "shrink-0 text-xs font-semibold text-[#111111]" : "shrink-0 text-xs font-normal text-zinc-500"}
           >
             {category.label}
           </Link>
@@ -79,6 +119,12 @@ export function CommunityPostTabs() {
       </nav>
 
       <div className="border-y border-zinc-200 bg-white md:hidden">
+        {loadingLivePosts ? (
+          <p className="border-b border-zinc-200 px-3 py-3 text-xs font-semibold text-zinc-500">Loading posts...</p>
+        ) : null}
+        {livePostsError ? (
+          <p className="border-b border-zinc-200 px-3 py-3 text-xs font-semibold text-red-500">{livePostsError}</p>
+        ) : null}
         {activeTab === "notice"
           ? notices.map((notice) => (
               <Link key={notice.id} href="/notice" className="block border-b border-zinc-200 px-3 py-3 transition hover:bg-zinc-50">
@@ -89,25 +135,29 @@ export function CommunityPostTabs() {
                 </h3>
                 <p className="mt-1 text-xs text-zinc-500">
                   {noticeTypeLabel[notice.type]}
-                  <span className="mx-1.5 text-zinc-300">|</span>
+                  <span className="mx-1.5 text-zinc-300">/</span>
                   SQUALL
-                  <span className="mx-1.5 text-zinc-300">|</span>
+                  <span className="mx-1.5 text-zinc-300">/</span>
                   {notice.date}
                 </p>
               </Link>
             ))
           : visiblePosts.map((post) => (
-              <Link key={post.id} href={`/post/${post.id}`} className="block border-b border-zinc-200 px-3 py-3 transition hover:bg-zinc-50">
+              <Link
+                key={`${post.source ?? "mock"}-${post.id}`}
+                href={post.href ?? `/post/${post.id}`}
+                className="block border-b border-zinc-200 px-3 py-3 transition hover:bg-zinc-50"
+              >
                 <h3 className="line-clamp-2 text-base font-medium leading-snug text-zinc-900">{post.title}</h3>
                 <p className="mt-1 text-xs text-zinc-500">
                   <span className="text-primary">{categoryLabel[post.category]}</span>
-                  <span className="mx-1.5 text-zinc-300">|</span>
+                  <span className="mx-1.5 text-zinc-300">/</span>
                   {post.author}
-                  <span className="mx-1.5 text-zinc-300">|</span>
-                  조회 {post.views.toLocaleString()}
-                  <span className="mx-1.5 text-zinc-300">|</span>
-                  댓글 {post.comments}
-                  <span className="mx-1.5 text-zinc-300">|</span>
+                  <span className="mx-1.5 text-zinc-300">/</span>
+                  Views {post.views.toLocaleString()}
+                  <span className="mx-1.5 text-zinc-300">/</span>
+                  Replies {post.comments}
+                  <span className="mx-1.5 text-zinc-300">/</span>
                   {post.date}
                 </p>
               </Link>
@@ -115,19 +165,25 @@ export function CommunityPostTabs() {
       </div>
 
       <div className="hidden overflow-x-auto border-y border-zinc-200 bg-white md:block">
+        {loadingLivePosts ? (
+          <p className="border-b border-zinc-200 px-3 py-3 text-xs font-semibold text-zinc-500">Loading posts...</p>
+        ) : null}
+        {livePostsError ? (
+          <p className="border-b border-zinc-200 px-3 py-3 text-xs font-semibold text-red-500">{livePostsError}</p>
+        ) : null}
         <table className="w-full table-fixed border-collapse">
           <colgroup>
             <col />
             <col className="w-16" />
             <col className="w-20" />
-            <col className="w-20" />
+            <col className="w-24" />
           </colgroup>
           <thead>
             <tr className="border-b border-zinc-200 text-xs font-medium text-zinc-500">
-              <th className="px-3 py-2 text-left">글</th>
-              <th className="px-2 py-2 text-center">댓글</th>
-              <th className="px-2 py-2 text-center">조회수</th>
-              <th className="px-2 py-2 text-center">활동</th>
+              <th className="px-3 py-2 text-left">Title</th>
+              <th className="px-2 py-2 text-center">Replies</th>
+              <th className="px-2 py-2 text-center">Views</th>
+              <th className="px-2 py-2 text-center">Date</th>
             </tr>
           </thead>
           <tbody>
@@ -154,15 +210,11 @@ export function CommunityPostTabs() {
                   </tr>
                 ))
               : visiblePosts.map((post) => (
-                  <tr key={post.id} className="border-b border-zinc-200 transition hover:bg-zinc-50">
+                  <tr key={`${post.source ?? "mock"}-${post.id}`} className="border-b border-zinc-200 transition hover:bg-zinc-50">
                     <td className="min-w-0 px-3 py-2.5">
-                      <Link href={`/post/${post.id}`} className="block min-w-0">
+                      <Link href={post.href ?? `/post/${post.id}`} className="block min-w-0">
                         <h3 className="truncate text-base font-medium text-zinc-900">{post.title}</h3>
-                        <p className="mt-1 truncate text-xs font-normal text-zinc-500">
-                          <span className="text-primary">{categoryLabel[post.category]}</span>
-                          <span className="mx-2 text-zinc-300">/</span>
-                          {post.author}
-                        </p>
+                        <PostMeta post={post} />
                       </Link>
                     </td>
                     <td className="px-2 py-2.5 text-center text-xs font-normal tabular-nums text-zinc-600">{post.comments}</td>

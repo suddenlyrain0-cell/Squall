@@ -20,6 +20,9 @@ export type Post = {
   comments: number;
   likes: number;
   excerpt: string;
+  content?: string;
+  href?: string;
+  source?: "mock" | "supabase";
 };
 
 export type Notice = {

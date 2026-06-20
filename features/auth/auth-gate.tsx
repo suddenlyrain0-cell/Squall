@@ -1,25 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Loader2, Lock } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/features/auth/auth-provider";
 
 export function AuthGate({
-  children,
-  redirectTo
+  children
 }: {
   children: React.ReactNode;
   redirectTo?: string;
 }) {
   const router = useRouter();
-  const pathname = usePathname();
   const { user, loading } = useAuth();
-  const nextPath = redirectTo ?? pathname;
-  const loginHref = useMemo(() => `/login?redirect=${encodeURIComponent(nextPath)}`, [nextPath]);
+  const loginHref = "/login";
 
   useEffect(() => {
     if (!loading && !user) {

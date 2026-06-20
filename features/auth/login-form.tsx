@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, LogIn, UserPlus } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -13,7 +13,6 @@ type AuthMode = "login" | "signup";
 
 export function LoginForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { user, loading, signIn, signUp } = useAuth();
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
@@ -23,15 +22,7 @@ export function LoginForm() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  const redirectTo = useMemo(() => {
-    const value = searchParams.get("redirect") ?? "/";
-
-    if (!value.startsWith("/") || value.startsWith("//")) {
-      return "/community";
-    }
-
-    return value;
-  }, [searchParams]);
+  const redirectTo = "/";
 
   useEffect(() => {
     if (!loading && user) {

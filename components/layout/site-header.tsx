@@ -20,7 +20,7 @@ export function SiteHeader() {
   const isLoggedIn = !!user;
   const userLabel = user?.email?.split("@")[0] ?? "Squaller";
   const userInitials = userLabel.slice(0, 2).toUpperCase();
-  const loginHref = `/login?redirect=${encodeURIComponent(pathname || "/")}`;
+  const loginHref = "/login";
   const trimmedSearch = search.trim().toLowerCase();
   const searchResults = useMemo(() => {
     if (!trimmedSearch) {
