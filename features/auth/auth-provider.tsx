@@ -1,6 +1,6 @@
 "use client";
 
-import type { User } from "@supabase/supabase-js";
+import type { Provider, User } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 
@@ -14,6 +14,7 @@ type AuthContextValue = {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (email: string, password: string) => Promise<AuthResult>;
+  signInWithOAuth: (provider: Extract<Provider, "google" | "kakao">) => Promise<AuthResult>;
   signOut: () => Promise<void>;
 };
 
@@ -73,6 +74,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         return { needsEmailConfirmation: !data.session };
+      },
+      signInWithOAuth: async (provider) => {
+        const redirectTo = `${window.location.origin}/`;
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: {
+            redirectTo
+          }
+        });
+
+        if (error) {
+          return { error: error.message };
+        }
+
+        return {};
       },
       signOut: async () => {
         await supabase.auth.signOut();

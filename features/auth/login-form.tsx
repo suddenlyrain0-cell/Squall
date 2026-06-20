@@ -13,12 +13,13 @@ type AuthMode = "login" | "signup";
 
 export function LoginForm() {
   const router = useRouter();
-  const { user, loading, signIn, signUp } = useAuth();
+  const { user, loading, signIn, signUp, signInWithOAuth } = useAuth();
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [oauthProvider, setOauthProvider] = useState<"google" | "kakao" | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
@@ -51,6 +52,19 @@ export function LoginForm() {
     }
 
     router.push(redirectTo);
+  }
+
+  async function handleOAuthLogin(provider: "google" | "kakao") {
+    setError("");
+    setNotice("");
+    setOauthProvider(provider);
+
+    const result = await signInWithOAuth(provider);
+
+    if (result.error) {
+      setError(result.error);
+      setOauthProvider(null);
+    }
   }
 
   return (
@@ -140,6 +154,35 @@ export function LoginForm() {
           {mode === "login" ? "Login" : "Create account"}
         </Button>
       </form>
+
+      <div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        <span className="h-px bg-white/10" />
+        <span className="text-xs font-black uppercase tracking-[0.16em] text-white/45">or</span>
+        <span className="h-px bg-white/10" />
+      </div>
+
+      <div className="grid gap-3">
+        <Button
+          type="button"
+          variant="secondary"
+          className="h-11 rounded-xl border-white/15 bg-white text-[#111111] hover:bg-zinc-100"
+          disabled={Boolean(oauthProvider) || loading}
+          onClick={() => void handleOAuthLogin("google")}
+        >
+          {oauthProvider === "google" ? <Loader2 className="h-4 w-4 animate-spin" /> : <span className="text-base font-black">G</span>}
+          Continue with Google
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          className="h-11 rounded-xl border-[#FEE500] bg-[#FEE500] text-[#191600] hover:bg-[#ffef33]"
+          disabled={Boolean(oauthProvider) || loading}
+          onClick={() => void handleOAuthLogin("kakao")}
+        >
+          {oauthProvider === "kakao" ? <Loader2 className="h-4 w-4 animate-spin" /> : <span className="text-base font-black">K</span>}
+          Continue with Kakao
+        </Button>
+      </div>
 
       <Button asChild variant="ghost" className="mt-4 w-full">
         <Link href="/">Back to home</Link>
