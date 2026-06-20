@@ -2,20 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Menu, Search, X } from "lucide-react";
+import { Bell, LogOut, Menu, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { mainNav } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
 import { notices, posts, updateNotes } from "@/services/mock-data";
+import { useAuth } from "@/features/auth/auth-provider";
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const { user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const isLoggedIn = false;
+  const isLoggedIn = !!user;
+  const userLabel = user?.email?.split("@")[0] ?? "Squaller";
+  const userInitials = userLabel.slice(0, 2).toUpperCase();
+  const loginHref = `/login?redirect=${encodeURIComponent(pathname || "/")}`;
   const trimmedSearch = search.trim().toLowerCase();
   const searchResults = useMemo(() => {
     if (!trimmedSearch) {
@@ -125,16 +130,27 @@ export function SiteHeader() {
             ) : null}
           </form>
           {isLoggedIn ? (
-            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/8 py-1 pl-1 pr-3">
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] py-1 pl-1 pr-3">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-black text-[#111111]">
-                SQ
+                {userInitials}
               </span>
-              <span className="text-sm font-bold">Squaller</span>
-              <Bell className="h-4 w-4 text-white/58" />
+              <span className="max-w-28 truncate text-sm font-bold">{userLabel}</span>
+              <Bell className="h-4 w-4 text-white/60" />
+              <button
+                type="button"
+                className="rounded-full p-1 text-white/60 transition hover:bg-white/10 hover:text-white"
+                aria-label="Logout"
+                onClick={() => void signOut()}
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
             </div>
           ) : (
-            <Button className="h-9 rounded-full bg-[#F34818] px-5 text-sm font-semibold text-white shadow-none hover:-translate-y-0 hover:bg-[#ff5a2a]">
-              Login
+            <Button
+              asChild
+              className="h-9 rounded-full bg-[#F34818] px-5 text-sm font-semibold text-white shadow-none hover:-translate-y-0 hover:bg-[#ff5a2a]"
+            >
+              <Link href={loginHref}>Login</Link>
             </Button>
           )}
         </div>
@@ -180,9 +196,36 @@ export function SiteHeader() {
                   {item.label}
                 </Link>
               ))}
-              <Button className="mt-3 h-10 w-full rounded-full bg-[#F34818] text-sm font-semibold text-white shadow-none hover:-translate-y-0 hover:bg-[#ff5a2a]">
-                Login
-              </Button>
+              {isLoggedIn ? (
+                <div className="mt-3 grid gap-3 rounded-xl border border-white/10 bg-white/[0.08] p-3">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-black text-[#111111]">
+                      {userInitials}
+                    </span>
+                    <span className="min-w-0 truncate text-sm font-bold text-white">{userLabel}</span>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    className="h-10 w-full rounded-full"
+                    onClick={() => {
+                      setOpen(false);
+                      void signOut();
+                    }}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  asChild
+                  className="mt-3 h-10 w-full rounded-full bg-[#F34818] text-sm font-semibold text-white shadow-none hover:-translate-y-0 hover:bg-[#ff5a2a]"
+                >
+                  <Link href={loginHref} onClick={() => setOpen(false)}>
+                    Login
+                  </Link>
+                </Button>
+              )}
             </div>
           </aside>
         </div>

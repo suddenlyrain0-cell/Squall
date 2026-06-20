@@ -42,6 +42,14 @@ a {
   color: #111111;
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff;
+  caret-color: #ffffff;
+  box-shadow: 0 0 0 1000px #111111 inset;
+}
+
 .noise {
   background-image:
     linear-gradient(rgba(17, 17, 17, 0.065) 1px, transparent 1px),

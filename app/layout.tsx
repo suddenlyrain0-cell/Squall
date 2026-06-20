@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "@/app/globals.css";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { AuthProvider } from "@/features/auth/auth-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,9 +25,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ko" className="dark">
       <body className={`${inter.variable} font-sans`}>
-        <SiteHeader />
-        {children}
-        <SiteFooter />
+        <AuthProvider>
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+        </AuthProvider>
       </body>
     </html>
   );
