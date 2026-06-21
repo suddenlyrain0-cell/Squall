@@ -70,6 +70,23 @@ for delete
 to authenticated
 using ((select auth.uid()) = author_id);
 
+create or replace function public.increment_community_post_view(target_post_id uuid)
+returns table (views integer)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  return query
+  update public.community_posts
+  set views = community_posts.views + 1
+  where id = target_post_id
+  returning community_posts.views;
+end;
+$$;
+
+grant execute on function public.increment_community_post_view(uuid) to anon, authenticated;
+
 create table if not exists public.community_post_comments (
   id uuid primary key default gen_random_uuid(),
   post_id uuid not null references public.community_posts(id) on delete cascade,

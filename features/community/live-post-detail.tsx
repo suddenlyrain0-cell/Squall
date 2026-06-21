@@ -11,10 +11,18 @@ import {
   createCommunityComment,
   fetchCommunityComments,
   fetchCommunityPost,
+  incrementCommunityPostView,
   type CommunityComment
 } from "@/services/community-posts";
 import { useAuth } from "@/features/auth/auth-provider";
 import type { Post } from "@/types/community";
+
+const viewCooldownMs = 6 * 60 * 60 * 1000;
+const viewStoragePrefix = "squall-post-viewed-at";
+
+function getViewStorageKey(postId: string) {
+  return `${viewStoragePrefix}:${postId}`;
+}
 
 export function LivePostDetail() {
   const searchParams = useSearchParams();
@@ -27,6 +35,7 @@ export function LivePostDetail() {
   const [comment, setComment] = useState("");
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const [commentError, setCommentError] = useState("");
+  const loadedPostId = post?.id;
 
   useEffect(() => {
     let mounted = true;
@@ -60,6 +69,37 @@ export function LivePostDetail() {
       mounted = false;
     };
   }, [id]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (!id || !loadedPostId) {
+      return;
+    }
+
+    const storageKey = getViewStorageKey(id);
+    const lastViewedAt = Number(window.localStorage.getItem(storageKey) || 0);
+
+    if (Number.isFinite(lastViewedAt) && Date.now() - lastViewedAt < viewCooldownMs) {
+      return;
+    }
+
+    window.localStorage.setItem(storageKey, String(Date.now()));
+
+    incrementCommunityPostView(id)
+      .then((views) => {
+        if (mounted && typeof views === "number") {
+          setPost((current) => (current ? { ...current, views } : current));
+        }
+      })
+      .catch(() => {
+        window.localStorage.removeItem(storageKey);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [id, loadedPostId]);
 
   async function handleCommentSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

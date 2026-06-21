@@ -48,6 +48,10 @@ export type CreateCommunityCommentInput = {
   content: string;
 };
 
+export type IncrementCommunityPostViewResult = {
+  views: number;
+};
+
 const categoryTags: Record<BoardCategory, string> = {
   free: "Free",
   guide: "Guide",
@@ -158,6 +162,18 @@ export async function fetchCommunityComments(postId: string) {
   }
 
   return (data as CommunityCommentRow[]).map(mapCommunityComment);
+}
+
+export async function incrementCommunityPostView(postId: string) {
+  const { data, error } = await supabase.rpc("increment_community_post_view", {
+    target_post_id: postId
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data as IncrementCommunityPostViewResult[])[0]?.views;
 }
 
 export async function createCommunityPost(input: CreateCommunityPostInput) {
