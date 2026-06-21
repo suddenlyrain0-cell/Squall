@@ -24,6 +24,30 @@ export type CreateCommunityPostInput = {
   tags: string[];
 };
 
+export type CommunityCommentRow = {
+  id: string;
+  post_id: string;
+  author_id: string;
+  author_name: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CommunityComment = {
+  id: string;
+  postId: string;
+  author: string;
+  avatar: string;
+  content: string;
+  date: string;
+};
+
+export type CreateCommunityCommentInput = {
+  postId: string;
+  content: string;
+};
+
 const categoryTags: Record<BoardCategory, string> = {
   free: "Free",
   guide: "Guide",
@@ -83,6 +107,17 @@ export function mapCommunityPost(row: CommunityPostRow): Post {
   };
 }
 
+export function mapCommunityComment(row: CommunityCommentRow): CommunityComment {
+  return {
+    id: row.id,
+    postId: row.post_id,
+    author: row.author_name,
+    avatar: getInitials(row.author_name),
+    content: row.content,
+    date: formatDate(row.created_at)
+  };
+}
+
 export async function fetchCommunityPosts() {
   const { data, error } = await supabase
     .from("community_posts")
@@ -109,6 +144,20 @@ export async function fetchCommunityPost(id: string) {
   }
 
   return mapCommunityPost(data as CommunityPostRow);
+}
+
+export async function fetchCommunityComments(postId: string) {
+  const { data, error } = await supabase
+    .from("community_post_comments")
+    .select("*")
+    .eq("post_id", postId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data as CommunityCommentRow[]).map(mapCommunityComment);
 }
 
 export async function createCommunityPost(input: CreateCommunityPostInput) {
@@ -145,4 +194,43 @@ export async function createCommunityPost(input: CreateCommunityPostInput) {
   }
 
   return mapCommunityPost(data as CommunityPostRow);
+}
+
+export async function createCommunityComment(input: CreateCommunityCommentInput) {
+  const content = input.content.trim();
+
+  if (!content) {
+    throw new Error("Reply cannot be empty.");
+  }
+
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser();
+
+  if (userError) {
+    throw new Error(userError.message);
+  }
+
+  if (!user) {
+    throw new Error("Login is required.");
+  }
+
+  const authorName = getDisplayName(user.email);
+  const { data, error } = await supabase
+    .from("community_post_comments")
+    .insert({
+      post_id: input.postId,
+      author_id: user.id,
+      author_name: authorName,
+      content
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return mapCommunityComment(data as CommunityCommentRow);
 }

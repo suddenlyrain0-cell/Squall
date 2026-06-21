@@ -3,19 +3,30 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Flag, Loader2, MessageSquare, Share2, ThumbsUp } from "lucide-react";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { fetchCommunityPost } from "@/services/community-posts";
+import {
+  createCommunityComment,
+  fetchCommunityComments,
+  fetchCommunityPost,
+  type CommunityComment
+} from "@/services/community-posts";
+import { useAuth } from "@/features/auth/auth-provider";
 import type { Post } from "@/types/community";
 
 export function LivePostDetail() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
+  const { user } = useAuth();
   const [post, setPost] = useState<Post | null>(null);
+  const [comments, setComments] = useState<CommunityComment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [comment, setComment] = useState("");
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [commentError, setCommentError] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -26,10 +37,11 @@ export function LivePostDetail() {
       return;
     }
 
-    fetchCommunityPost(id)
-      .then((item) => {
+    Promise.all([fetchCommunityPost(id), fetchCommunityComments(id)])
+      .then(([item, fetchedComments]) => {
         if (mounted) {
           setPost(item);
+          setComments(fetchedComments);
           setError("");
         }
       })
@@ -48,6 +60,39 @@ export function LivePostDetail() {
       mounted = false;
     };
   }, [id]);
+
+  async function handleCommentSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!id || !post) {
+      return;
+    }
+
+    setCommentSubmitting(true);
+    setCommentError("");
+
+    try {
+      const createdComment = await createCommunityComment({
+        postId: id,
+        content: comment
+      });
+
+      setComments((current) => [...current, createdComment]);
+      setPost((current) =>
+        current
+          ? {
+              ...current,
+              comments: current.comments + 1
+            }
+          : current
+      );
+      setComment("");
+    } catch (caughtError) {
+      setCommentError(caughtError instanceof Error ? caughtError.message : "Failed to create reply.");
+    } finally {
+      setCommentSubmitting(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -118,14 +163,73 @@ export function LivePostDetail() {
 
       <section className="mt-10">
         <h2 className="mb-5 text-2xl font-black text-white">Replies {post.comments}</h2>
-        <Card className="p-5">
-          <div className="flex gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-black text-white">
-              <MessageSquare className="h-4 w-4" />
-            </span>
-            <p className="leading-7 text-white/60">Replies are not connected yet.</p>
-          </div>
-        </Card>
+
+        <div className="grid gap-4">
+          {comments.length > 0 ? (
+            comments.map((item) => (
+              <Card key={item.id} className="p-5">
+                <div className="flex gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-black text-white">
+                    {item.avatar}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <p className="font-black text-white">{item.author}</p>
+                      <span className="text-xs font-bold text-white/42">{item.date}</span>
+                    </div>
+                    <p className="mt-2 whitespace-pre-wrap leading-7 text-white/66">{item.content}</p>
+                  </div>
+                </div>
+              </Card>
+            ))
+          ) : (
+            <Card className="p-5">
+              <div className="flex gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-black text-white">
+                  <MessageSquare className="h-4 w-4" />
+                </span>
+                <p className="leading-7 text-white/60">Be the first to reply.</p>
+              </div>
+            </Card>
+          )}
+
+          <Card className="p-5">
+            {user ? (
+              <form className="grid gap-3" onSubmit={handleCommentSubmit}>
+                <label className="grid gap-2">
+                  <span className="text-sm font-black text-white">Write a reply</span>
+                  <textarea
+                    className="min-h-28 rounded-xl border border-white/10 bg-[#111111] p-4 leading-7 text-white caret-white outline-none transition placeholder:text-white/40 focus:border-primary"
+                    value={comment}
+                    onChange={(event) => {
+                      setComment(event.target.value);
+                      setCommentError("");
+                    }}
+                    placeholder="Add your thoughts."
+                    maxLength={2000}
+                    required
+                  />
+                </label>
+                {commentError ? (
+                  <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">{commentError}</p>
+                ) : null}
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={commentSubmitting || !comment.trim()}>
+                    {commentSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+                    Reply
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="font-semibold text-white/62">Login to join the conversation.</p>
+                <Button asChild>
+                  <Link href="/login">Login</Link>
+                </Button>
+              </div>
+            )}
+          </Card>
+        </div>
       </section>
 
       <nav className="mt-10 border-t border-white/10 pt-8">
